@@ -8,6 +8,7 @@
 // Original Code from : https://corgitronics.com/2014/06/30/using-the-cirrus-logic-cs5464-for-ac-current-measurement/
 
 #include <SPI.h>
+#define Serial1 Serial
 
 // Pin configurations
 // set pin 12 as the slave select for the digital pot:
@@ -100,20 +101,22 @@ void loop() {
 void SPI_writeCommand(byte command) {
   digitalWrite(slaveSelectPin, LOW); //SS goes low to mark start of transmission
   union FourByte data = {0xFEFEFE, command}; //generate the data to be sent, i.e. your command plus the Sync bytes.
-  Serial.print("SPI_writeCommand for (char i = 3; i >= 0; i--) {
-               SPI.transfer(data.bit8[i]); //transfer all 4 bytes of data - command first, then Big Endian transfer of the 24bit value.
-               Serial.print(data.bit8[i], HEX);
-             }
-               Serial.println();
-               digitalWrite(slaveSelectPin, HIGH);
-             }
+  Serial.print("SPI_writeCommand");
+  for (char i = 3; i >= 0; i--) {
+    SPI.transfer(data.bit8[i]); //transfer all 4 bytes of data - command first, then Big Endian transfer of the 24bit value.
+    Serial.print(data.bit8[i], HEX);
+  }
+  Serial.println();
+  digitalWrite(slaveSelectPin, HIGH);
+}
 
-               // Read a register from the CS5464 - just supply a command byte (see the datasheet)
-               unsigned long SPI_read(byte command) {
-               digitalWrite(slaveSelectPin, LOW); //SS goes low to mark start of transmission
-               union FourByte data = {0xFEFEFE, command}; //generate the data to be sent, i.e. your command plus the Sync bytes.
-  // Serial.print("SPI_Read for (char i = 3; i >= 0; i--) {
-  data.bit8[i] = SPI.transfer(data.bit8[i]); //send the data whilst reading in the result
+// Read a register from the CS5464 - just supply a command byte (see the datasheet)
+unsigned long SPI_read(byte command) {
+  digitalWrite(slaveSelectPin, LOW); //SS goes low to mark start of transmission
+  union FourByte data = {0xFEFEFE, command}; //generate the data to be sent, i.e. your command plus the Sync bytes.
+  // Serial.print("SPI_Read")
+  for (char i = 3; i >= 0; i--) {
+    data.bit8[i] = SPI.transfer(data.bit8[i]); //send the data whilst reading in the result
     // Serial.print(data.bit8[i], HEX);
   }
   // Serial.println();
