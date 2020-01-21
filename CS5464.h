@@ -45,5 +45,11 @@ are used*/
 #define CTRL 0x1C
 
 /* PAGE1 Registers */
+#define OFF_CUR1 0x00
+#define OFF_VOL1 0x02
+
+/* PAGE2 Registers */
+#define SAG_DUR_VOL1 0x00 // Voltage1 Sag duration
+#define SAG_DUR_VOL2 0x08 // Voltage2 Sag duration
 
 #endif
