@@ -47,6 +47,35 @@ are used*/
 /* PAGE1 Registers */
 #define OFF_CUR1 0x00
 #define OFF_VOL1 0x02
+#define OFF_CUR2 0x07
+#define OFF_VOL2 0x09
+#define GAIN_CUR1 0x01
+#define GAIN_VOL1 0x03
+#define GAIN_CUR2 0x08
+#define GAIN_VOL2 0x0A
+#define OFF_POW1 0x04
+#define OFF_POW2 0x0B
+#define ACOFF_CUR1 0x05
+#define ACOFF_VOL1 0x06
+#define ACOFF_CUR2 0x0C
+#define ACOFF_VOL2 0x0D
+#define MODES 0x10
+#define EPSILON 0x11
+#define PULSEWIDTH 0x0E
+#define PULSERATE 0x0F
+#define CYCLECOUNT 0x13
+#define ICHAN_LEVEL 0x12
+#define E_MIN 0x18
+#define WB_Q1 0x14
+#define WB_Q2 0x15
+#define TEMP_GAIN 0x16
+#define TEMP_OFFSET 0x17
+#define TIME_SETTLE 0x19
+#define LOAD_MIN 0x1A
+#define RMS_VF 0x1B
+#define SYS_GAIN 0x1C
+#define SYS_TIME 0x1D
+
 
 /* PAGE2 Registers */
 #define SAG_DUR_VOL1 0x00 // Voltage1 Sag duration
