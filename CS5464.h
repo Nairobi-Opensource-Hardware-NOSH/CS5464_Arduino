@@ -80,5 +80,11 @@ are used*/
 /* PAGE2 Registers */
 #define SAG_DUR_VOL1 0x00 // Voltage1 Sag duration
 #define SAG_DUR_VOL2 0x08 // Voltage2 Sag duration
+#define FLT_DUR_CUR1 0x04 // Current1 Fault duration
+#define FLT_DUR_CUR2 0x0C // Current2 Fault duration
+#define SAG_LVL_VOL1 0x01 // Voltage1 Sag level
+#define SAG_LVL_VOL2 0x09 // Voltage2 Sag level
+#define FLT_LVL_CUR1 0x05 // Current1 Fault level
+#define FLT_LVL_CUR2 0x0D // Current2 Fault level
 
 #endif
