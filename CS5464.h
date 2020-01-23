@@ -76,7 +76,6 @@ are used*/
 #define SYS_GAIN 0x1C
 #define SYS_TIME 0x1D
 
-
 /* PAGE2 Registers */
 #define SAG_DUR_VOL1 0x00 // Voltage1 Sag duration
 #define SAG_DUR_VOL2 0x08 // Voltage2 Sag duration
@@ -86,5 +85,28 @@ are used*/
 #define SAG_LVL_VOL2 0x09 // Voltage2 Sag level
 #define FLT_LVL_CUR1 0x05 // Current1 Fault level
 #define FLT_LVL_CUR2 0x0D // Current2 Fault level
+
+/* Commands */
+#define CONV_SINGLE 0xE0
+#define CONV_CONT 0xE8
+#define SYNC0 0xFE
+#define SYNC1 0xFF
+#define SOFT_RESET 0x80
+#define SLEEP 0x90
+#define WAKE_HALT 0xA0
+#define STAND_BY 0xB0
+
+/******************************************************/
+/*      CAL[5:4]* 00 = DC Offset
+*                 01 = DC Gain
+*                 10 = AC Offset
+*                 11 = AC Gain
+*       CAL[3:0] 0001 = Current for Channel 1
+*                0010 = Voltage for Channel 1
+*                0100 = Current for Channel 2
+*                1000 = Voltage for Channel 2
+* There are 16 calibration commands,
+* better to generate them programmitacally
+********************************************************/
 
 #endif
