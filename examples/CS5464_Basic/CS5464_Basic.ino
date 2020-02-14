@@ -8,6 +8,7 @@
 // Original Code from : https://corgitronics.com/2014/06/30/using-the-cirrus-logic-cs5464-for-ac-current-measurement/
 
 #include <SPI.h>
+#include <CS5464.h>
 #define Serial1 Serial
 
 // Pin configurations
@@ -48,11 +49,12 @@ void setup() {
   Serial1.println("Setup...");
 
   //Perform software reset:
-  SPI_writeCommand(0x80);
+  SPI_writeCommand(SOFT_RESET);
   delay(2000);
   unsigned long status;
   do {
-    status = SPI_read(0b00011110); //read the status register
+    // TODO: Verify datasheet for status register STATUS = 0x0F
+    status = SPI_read(STATUS<<1); //read the status register
     status &= (1UL << 23);
     Serial1.print(".");
   } while (!status);
@@ -60,10 +62,10 @@ void setup() {
   Serial1.println("CS5464 Ready!!");
 
   // SPI_writeCommand(0xE0); //Set single conversion mode
-  SPI_writeCommand(0xE8); //Set continuous conversion mode
+  SPI_writeCommand(CONV_CONT); //Set continuous conversion mode
 
   // Print the configuration register, to confirm communication with the CS5464
-  unsigned long check = SPI_read(0x00); //read the config register.
+  unsigned long check = SPI_read(CONFIG); //read the config register.
   Serial1.print("Config = ");
   Serial1.println(check, HEX);
 
@@ -81,7 +83,8 @@ void loop() {
   delay(1000);
   //example of reading data
   // unsigned long voltage = SPI_read(0b00001110); //read Register 7 Instantaneous Current Channel 2
-  unsigned long peak_current = SPI_read(0b00101100); //read Register 22 Peak Current Channel 2
+  // TODO: Verify Peak Current register datasheet suggests PEAK_CUR2 = 0x16
+  unsigned long peak_current = SPI_read(PEAK_CUR2<<1); //read Register 22 Peak Current Channel 2
   peak_current = peak_current >> 8;
   Serial1.print("Peak Current = ");
   Serial1.println(peak_current);
@@ -90,9 +93,9 @@ void loop() {
   // Found that noise from switching AC loads can cause the CS5464 to lock-up.
   // need to improve power or signal filtering, but this is a patch for initial testing.
   if (peak_current == 0) { // If we get a 0 reading, then reconfigure the device
-    SPI_writeCommand(0xE8); //Set continuous conversion mode
+    SPI_writeCommand(CONV_CONT); //Set continuous conversion mode
     delay(1000);
-    unsigned long check = SPI_read(0x00); //read the config register.
+    unsigned long check = SPI_read(CONFIG); //read the config register.
     Serial1.print("Config = ");
     Serial1.println(check, HEX);
   }
