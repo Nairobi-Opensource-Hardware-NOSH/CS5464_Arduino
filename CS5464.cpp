@@ -39,6 +39,8 @@ void CS5464::InitEnergyIC()
         status = ReadRegister(EM_STATUS << 1); //read the status register
         status &= (1UL << 23);
     } while (!status);
+    // WriteCommand(0xE0); //Set single conversion mode
+    WriteCommand(CONV_CONT); //Set continuous conversion mode
 }
 
 void CS5464::WriteCommand(uint8_t command)

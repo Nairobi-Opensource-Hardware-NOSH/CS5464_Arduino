@@ -15,58 +15,21 @@
 // Pin configurations
 // set pin 12 as the slave select for the digital pot:
 const int slaveSelectPin = 5;
-
-// set pin 11 as the Reset pin for the CS5464:
-const int resetPin = 16;
-
-// Create a data type for the 4 Byte data and command packet
-union FourByte {
-  struct {
-    unsigned long value: 24; //24bit register values go in here
-    uint8_t command: 8; //8bit command goes in here.
-  };
-  uint8_t bit8[4]; //this is just used for efficient conversion of the above into 4 bytes.
-};
+CS5464 emon_ic(slaveSelectPin);
 
 // Initialize SPI and pins
 void setup() {
-  // reset the CS5464 device
-  pinMode(resetPin, OUTPUT);
-  delay(100);
-  digitalWrite(resetPin, LOW);
-  delay(100);
-  digitalWrite(resetPin, HIGH);
-  delay(100);
-
-  SPI.begin();
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE3); //I believe it to be Mode3
-  SPI.setClockDivider(SPI_CLOCK_DIV16);
-  pinMode(slaveSelectPin, OUTPUT); // Do this manually, as the SPI library doesn't work right for all versions.
-  digitalWrite(slaveSelectPin, HIGH);
-
   Serial1.begin(9600);
   delay(5000); // Pause allowing time to open the serial monitor
   Serial1.println("Setup...");
 
   //Perform software reset:
-  SPI_writeCommand(SOFT_RESET);
-  delay(2000);
-  unsigned long status;
-  do {
-    // TODO: Verify datasheet for status register STATUS = 0x0F
-    status = SPI_read(EM_STATUS<<1); //read the status register
-    status &= (1UL << 23);
-    Serial1.print(".");
-  } while (!status);
+  emon_ic.InitEnergyIC();
 
   Serial1.println("CS5464 Ready!!");
 
-  // SPI_writeCommand(0xE0); //Set single conversion mode
-  SPI_writeCommand(CONV_CONT); //Set continuous conversion mode
-
   // Print the configuration register, to confirm communication with the CS5464
-  unsigned long check = SPI_read(CONFIG); //read the config register.
+  unsigned long check = emon_ic.ReadRegister(CONFIG); //read the config register.
   Serial1.print("Config = ");
   Serial1.println(check, HEX);
 }
@@ -77,7 +40,7 @@ void loop() {
   //example of reading data
   // unsigned long voltage = SPI_read(0b00001110); //read Register 7 Instantaneous Current Channel 2
   // TODO: Verify Peak Current register datasheet suggests PEAK_CUR2 = 0x16
-  unsigned long peak_current = SPI_read(PEAK_CUR2<<1); //read Register 22 Peak Current Channel 2
+  unsigned long peak_current = emon_ic.ReadRegister(PEAK_CUR2<<1); //read Register 22 Peak Current Channel 2
   peak_current = peak_current >> 8;
   Serial1.print("Peak Current = ");
   Serial1.println(peak_current);
@@ -86,38 +49,10 @@ void loop() {
   // Found that noise from switching AC loads can cause the CS5464 to lock-up.
   // need to improve power or signal filtering, but this is a patch for initial testing.
   if (peak_current == 0) { // If we get a 0 reading, then reconfigure the device
-    SPI_writeCommand(CONV_CONT); //Set continuous conversion mode
+    emon_ic.WriteCommand(CONV_CONT); //Set continuous conversion mode
     delay(1000);
-    unsigned long check = SPI_read(CONFIG); //read the config register.
+    unsigned long check = emon_ic.ReadRegister(CONFIG); //read the config register.
     Serial1.print("Config = ");
     Serial1.println(check, HEX);
   }
-}
-
-// Send a Command to the CS5464 - see the data sheet for commands
-void SPI_writeCommand(byte command) {
-  digitalWrite(slaveSelectPin, LOW); //SS goes low to mark start of transmission
-  union FourByte data = {0xFEFEFE, command}; //generate the data to be sent, i.e. your command plus the Sync bytes.
-  // Serial1.print("SPI_writeCommand");
-  for (int i = 3; i >= 0; i--) {
-    SPI.transfer(data.bit8[i]); //transfer all 4 bytes of data - command first, then Big Endian transfer of the 24bit value.
-    // Serial1.print(i);
-    // Serial1.print(data.bit8[i], HEX);
-  }
-  // Serial1.println();
-  digitalWrite(slaveSelectPin, HIGH);
-}
-
-// Read a register from the CS5464 - just supply a command byte (see the datasheet)
-unsigned long SPI_read(byte command) {
-  digitalWrite(slaveSelectPin, LOW); //SS goes low to mark start of transmission
-  union FourByte data = {0xFEFEFE, command}; //generate the data to be sent, i.e. your command plus the Sync bytes.
-  // Serial1.print("SPI_Read");
-  for (int i = 3; i >= 0; i--) {
-    data.bit8[i] = SPI.transfer(data.bit8[i]); //send the data whilst reading in the result
-    // Serial1.print(data.bit8[i], HEX);
-  }
-  // Serial1.println();
-  digitalWrite(slaveSelectPin, HIGH); //SS goes high to mark end of transmission
-  return data.value; //return the 24bit value recieved.
 }
