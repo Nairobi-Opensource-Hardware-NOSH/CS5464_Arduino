@@ -9,6 +9,7 @@
 
 #include <SPI.h>
 #include <CS5464.h>
+
 #define Serial1 Serial
 
 // Pin configurations
@@ -22,9 +23,9 @@ const int resetPin = 16;
 union FourByte {
   struct {
     unsigned long value: 24; //24bit register values go in here
-    byte command: 8; //8bit command goes in here.
+    uint8_t command: 8; //8bit command goes in here.
   };
-  byte bit8[4]; //this is just used for efficient conversion of the above into 4 bytes.
+  uint8_t bit8[4]; //this is just used for efficient conversion of the above into 4 bytes.
 };
 
 // Initialize SPI and pins
@@ -54,7 +55,7 @@ void setup() {
   unsigned long status;
   do {
     // TODO: Verify datasheet for status register STATUS = 0x0F
-    status = SPI_read(STATUS<<1); //read the status register
+    status = SPI_read(EM_STATUS<<1); //read the status register
     status &= (1UL << 23);
     Serial1.print(".");
   } while (!status);
@@ -68,14 +69,6 @@ void setup() {
   unsigned long check = SPI_read(CONFIG); //read the config register.
   Serial1.print("Config = ");
   Serial1.println(check, HEX);
-
-  /*
-    //example of writing a register
-    union FourByte data;
-    data.command = 0b01000000; //Write to config register
-    data.value = 1; //This is the default value from datasheet, just using it as an example.
-    SPI_writeRegister(data);
-  */
 }
 
 // Main loop

@@ -1,6 +1,8 @@
 #ifndef __CS5464_SPI_H__
 #define __CS5464_SPI_H__
 
+#include <Arduino.h>
+
 /* Define all the register from DATASHEET for CS5464 */
 /*****************************************************/
 
@@ -40,7 +42,7 @@ are used*/
 #define E_PULSE 0x1D
 #define S_PULSE 0x1E
 #define Q_PULSE 0x1F
-#define STATUS 0x0F
+#define EM_STATUS 0x0F
 #define MASK 0x1A
 #define CTRL 0x1C
 
@@ -108,5 +110,23 @@ are used*/
 * There are 16 calibration commands,
 * better to generate them programmitacally
 ********************************************************/
+
+
+/*********************************/
+/* CS5464 Energy Monitor Object  */
+/*********************************/
+const int energy_CS = SS; // Use default SS pin for unknown Arduino
+
+class CS5464
+{
+	public:
+		CS5464(int pin=energy_CS);
+        void InitEnergyIC();
+        unsigned long ReadRegister(uint8_t reg);
+        void WriteCommand(uint8_t command);
+    private:
+        int _cs;
+
+};
 
 #endif
